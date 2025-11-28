@@ -3,14 +3,24 @@
 namespace App\Http\Controllers\Pemilik;
 
 use App\Http\Controllers\Controller;
-use App\Models\Kos;
 use Illuminate\Http\Request;
+use App\Services\KosService;
 
 class KosController extends Controller
 {
+    private KosService $service;
+
+    public function __construct()
+    {
+        $this->middleware(['auth', 'role:pemilik']);
+
+        // Ambil Insiasi Singletonnya disini
+        $this->service = KosService::getInstance();
+    }
+
     public function index()
     {
-        $kosList = Kos::where('user_id', auth()->id())->get();
+        $kosList = $this->service->getAllByOwner(auth()->id());
         return view('pemilik.kos.index', compact('kosList'));
     }
 
@@ -27,42 +37,40 @@ class KosController extends Controller
             'deskripsi'=> 'nullable|string',
         ]);
 
-        Kos::create([
-            'user_id'  => auth()->id(),
-            'nama_kos' => $request->nama_kos,
-            'alamat'   => $request->alamat,
-            'deskripsi'=> $request->deskripsi,
-        ]);
+        $this->service->createKos($request->all(), auth()->id());
 
-        return redirect()->route('pemilik.kos.index')->with('success', 'Kos berhasil ditambahkan!');
+        return redirect()
+            ->route('pemilik.kos.index')
+            ->with('success', 'Kos berhasil ditambahkan!');
     }
 
     public function edit($id)
     {
-        $kos = Kos::where('user_id', auth()->id())->findOrFail($id);
+        $kos = $this->service->findByOwner(auth()->id(), $id);
         return view('pemilik.kos.edit', compact('kos'));
     }
 
     public function update(Request $request, $id)
     {
-        $kos = Kos::where('user_id', auth()->id())->findOrFail($id);
-
         $request->validate([
             'nama_kos' => 'required|string|max:255',
             'alamat'   => 'required|string',
             'deskripsi'=> 'nullable|string',
         ]);
 
-        $kos->update($request->only(['nama_kos', 'alamat', 'deskripsi']));
+        $this->service->updateKos(auth()->id(), $id, $request->only(['nama_kos', 'alamat', 'deskripsi']));
 
-        return redirect()->route('pemilik.kos.index')->with('success', 'Data kos berhasil diperbarui!');
+        return redirect()
+            ->route('pemilik.kos.index')
+            ->with('success', 'Data kos berhasil diperbarui!');
     }
 
     public function destroy($id)
     {
-        $kos = Kos::where('user_id', auth()->id())->findOrFail($id);
-        $kos->delete();
+        $this->service->deleteKos(auth()->id(), $id);
 
-        return redirect()->route('pemilik.kos.index')->with('success', 'Kos berhasil dihapus!');
+        return redirect()
+            ->route('pemilik.kos.index')
+            ->with('success', 'Kos berhasil dihapus!');
     }
 }

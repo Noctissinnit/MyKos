@@ -14,6 +14,7 @@
     <style>
         * {
             font-family: "Poppins", sans-serif;
+            box-sizing: border-box;
         }
 
         body {
@@ -102,11 +103,11 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('home') || request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">
+                    {{-- <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('user.kos.index') || request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">
                             <i class="bi bi-house-door me-1"></i> Beranda
                         </a>
-                    </li>
+                    </li> --}}
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('user.kos.*') ? 'active' : '' }}" href="{{ route('user.kos.index') }}">
                             <i class="bi bi-search me-1"></i> Cari Kos
