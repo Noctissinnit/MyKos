@@ -206,7 +206,9 @@
         <a href="{{ route('pemilik.room_types.create') }}" class="nav-link {{ request()->is('pemilik/room-types/create') ? 'active' : '' }}"><i class="bi bi-plus-square"></i> <span>Tambah Tipe</span></a>
         <a href="{{ route('pemilik.rental_requests.index') }}" class="nav-link {{ request()->is('pemilik/rental-requests*') ? 'active' : '' }}"><i class="bi bi-person-badge"></i> <span>Permintaan Sewa</span></a>
         <a href="{{ route('pemilik.kamars.index') }}" class="nav-link {{ request()->is('pemilik/kamars*') ? 'active' : '' }}"><i class="bi bi-people"></i> <span>Daftar Kamar</span></a>
-        <a href="{{ route('pemilik.reports.finance') }}" class="nav-link {{ request()->is('pemilik/reports/finance*') ? 'active' : '' }}"><i class="bi bi-cash-coin"></i> <span>Transaksi</span></a>
+       <a href="{{ route('pemilik.reports.transactions') }}" class="nav-link {{ request()->is('pemilik.reports.transactions*') ? 'active' : '' }}">             <i class="bi bi-cash-coin"></i> <span>Transaksi</span>
+                    </a>
+       
         <a href="{{ route('pemilik.reports.finance') }}" class="nav-link {{ request()->is('pemilik/reports/finance*') ? 'active' : '' }}"><i class="bi bi-file-earmark-text"></i> <span>Laporan</span></a>
 
         <a href="{{ route('logout') }}" class="logout-btn mt-4"
@@ -244,5 +246,7 @@
             }
         });
     </script>
+
+    @yield('scripts')
 </body>
 </html>

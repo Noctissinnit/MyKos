@@ -93,7 +93,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="{{ url('/') }}">
+            <a class="navbar-brand" href="{{ url('/user/dashboard') }}">
                 <i class="bi bi-door-open icon""></i> Kos ku
             </a>
 
@@ -103,11 +103,11 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {{-- <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('user.kos.index') || request()->is('/') ? 'active' : '' }}" href="{{ url('/') }}">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('user.dashboard') || request()->is('/') ? 'active' : '' }}" href="{{ url('/user/dashboard') }}">
                             <i class="bi bi-house-door me-1"></i> Beranda
                         </a>
-                    </li> --}}
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link {{ request()->routeIs('user.kos.*') ? 'active' : '' }}" href="{{ route('user.kos.index') }}">
                             <i class="bi bi-search me-1"></i> Cari Kos

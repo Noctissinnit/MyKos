@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Pemilik;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kos;
+use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use App\Services\ReportService;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -73,4 +75,20 @@ class ReportController extends Controller
         $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
         return $response;
     }
+
+   public function transaksi()
+    {
+        $pemilikKosIds = Kos::where('user_id', auth()->id())->pluck('id');
+
+        // Semua pembayaran dari penghuni yang kamar-nya berada di kos milik user
+        $pembayarans = Pembayaran::with('penghuni.user', 'penghuni.kamar')
+            ->whereHas('penghuni.kamar', function ($q) use ($pemilikKosIds) {
+                $q->whereIn('kos_id', $pemilikKosIds);
+            })
+            ->orderBy('tanggal_bayar', 'desc')
+            ->get();
+
+        return view('pemilik.reports.transaksi', compact('pembayarans'));
+    }
+
 }

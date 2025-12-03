@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Pemilik\KamarController;
 use App\Http\Controllers\Pemilik\KosController;
+use App\Http\Controllers\Pemilik\ReportController as PemilikReportController;
 use App\Http\Controllers\PemilikController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Pemilik\RoomTypeController;
@@ -87,6 +89,8 @@ Route::middleware(['auth', 'notbanned', 'role:pemilik'])->name('pemilik.')->grou
     // Pemilik: finance report
     Route::get('/pemilik/reports/finance', [\App\Http\Controllers\Pemilik\ReportController::class, 'finance'])->name('reports.finance');
     Route::get('/pemilik/reports/finance/export', [\App\Http\Controllers\Pemilik\ReportController::class, 'exportCsv'])->name('reports.finance.export');
+    Route::get('pemilik/reports/transactions', [PemilikReportController::class, 'transaksi'])
+     ->name('reports.transactions');
 });
 
 Route::middleware(['auth', 'notbanned', 'role:user'])->group(function () {

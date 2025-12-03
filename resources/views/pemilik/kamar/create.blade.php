@@ -18,6 +18,9 @@
                                 </ul>
                             </div>
                         @endif
+                        
+                        <input type="hidden" id="kelas" name="kelas">
+
 
                         <div class="mb-3">
                             <label>Nomor Kamar</label>
@@ -25,28 +28,22 @@
                         </div>
 
                 <div class="mb-3">
-                    <label>Kelas Kamar</label>
-                    <select name="kelas" class="form-select" required>
-                        <option value="ekonomi">Ekonomi</option>
-                        <option value="standar">Standar</option>
-                        <option value="premium">Premium</option>
+                    <label>Tipe Kamar</label>
+                    <select name="room_type_id" id="room_type_id" class="form-select" required>
+                        <option value="">-- Pilih Tipe Kamar --</option>
+                        @foreach($roomTypes as $type)
+                            <option value="{{ $type->id }}" data-harga="{{ $type->harga }}">
+                                {{ $type->nama }}
+                            </option>
+                        @endforeach
                     </select>
                 </div>
-
 
                 <div class="mb-3">
                     <label>Harga (per bulan)</label>
-                    <input type="number" name="harga" class="form-control" value="{{ old('harga') }}" required>
+                    <input type="number" id="harga" name="harga" class="form-control" readonly>
                 </div>
 
-
-                <div class="mb-3">
-                    <label>Status</label>
-                    <select name="status" class="form-select">
-                        <option value="kosong" {{ old('status') == 'kosong' ? 'selected' : '' }}>Kosong</option>
-                        <option value="terisi" {{ old('status') == 'terisi' ? 'selected' : '' }}>Terisi</option>
-                    </select>
-                </div>
 
                 <button type="submit" class="btn btn-success">Simpan</button>
                 <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn btn-secondary">Kembali</a>
@@ -55,3 +52,18 @@
     </div>
 </div>
 @endsection
+
+@section('scripts')
+
+<script>
+document.getElementById('room_type_id').addEventListener('change', function() {
+    let selected = this.options[this.selectedIndex];
+    let harga = selected.getAttribute('data-harga');
+    let nama = selected.text; // kelas = nama type
+
+    document.getElementById('harga').value = harga ?? '';
+    document.getElementById('kelas').value = nama ?? '';
+});
+</script>
+
+@endsection 

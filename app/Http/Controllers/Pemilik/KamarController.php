@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Pemilik;
 use App\Http\Controllers\Controller;
 use App\Models\Kamar;
 use App\Models\Kos;
+use App\Models\RoomType;
 use Illuminate\Http\Request;
 
 class KamarController extends Controller
@@ -24,10 +25,13 @@ class KamarController extends Controller
         return view('pemilik.kamar.all', compact('kamars'));
     }
 
-    public function create($kos_id)
+   public function create($kos_id)
     {
         $kos = Kos::where('user_id', auth()->id())->findOrFail($kos_id);
-        return view('pemilik.kamar.create', compact('kos'));
+
+        $roomTypes = \App\Models\RoomType::all(); // 👈 ambil semua tipe kamar
+
+        return view('pemilik.kamar.create', compact('kos', 'roomTypes'));
     }
 
     public function store(Request $request, $kos_id)
@@ -35,18 +39,26 @@ class KamarController extends Controller
         $kos = Kos::where('user_id', auth()->id())->findOrFail($kos_id);
 
         $request->validate([
-            'nomor'      => 'required|string|max:50',
-            'nama_kamar' => 'nullable|string|max:255',
-            'kelas'      => 'required|in:ekonomi,standar,premium',
-            'harga'      => 'required|numeric|min:0',
-            'status'     => 'nullable|in:kosong,terisi',
-            'deskripsi'  => 'nullable|string',
+            'nomor'        => 'required|string|max:50',
+            'room_type_id' => 'required|exists:room_types,id',
         ]);
 
-        $kos->kamars()->create($request->only(['nomor', 'nama_kamar', 'kelas', 'harga', 'status', 'deskripsi']));
+        $roomType = RoomType::findOrFail($request->room_type_id);
 
-        return redirect()->route('pemilik.kamar.index', $kos_id)->with('success', 'Kamar berhasil ditambahkan!');
+        $kos->kamars()->create([
+            'nomor'        => $request->nomor,
+            'room_type_id' => $roomType->id,
+            'kelas'        => $roomType->nama,  // ← ambil dari kolom nama
+            'harga'        => $roomType->harga, // ← auto dari room_types
+            'status'       => 'kosong',         // default
+        ]);
+
+        return redirect()
+            ->route('pemilik.kamar.index', $kos_id)
+            ->with('success', 'Kamar berhasil ditambahkan!');
     }
+
+
 
     public function edit($kos_id, $id)
     {

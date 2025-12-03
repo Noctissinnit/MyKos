@@ -29,7 +29,7 @@ class KosService
     {
         return Kos::create([
             'user_id'   => $ownerId,
-            'nama_kos'  => $data['nama_kos'],
+            'nama'  => $data['nama'],
             'alamat'    => $data['alamat'],
             'deskripsi' => $data['deskripsi'] ?? null,
         ]);

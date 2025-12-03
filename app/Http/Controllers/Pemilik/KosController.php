@@ -32,7 +32,7 @@ class KosController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_kos' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'alamat'   => 'required|string',
             'deskripsi'=> 'nullable|string',
         ]);
@@ -53,7 +53,7 @@ class KosController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'nama_kos' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'alamat'   => 'required|string',
             'deskripsi'=> 'nullable|string',
         ]);
