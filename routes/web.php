@@ -12,9 +12,16 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Pemilik\RoomTypeController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+// Public routes: allow guests to browse kos and room types without logging in
+Route::get('/cari-kos', [\App\Http\Controllers\RentalRequestController::class, 'index'])->name('user.kos.index');
+// Landing page (optional home/marketing page)
+Route::get('/', function () { return view('landing'); })->name('landing');
+Route::get('/kos/{kos}/room-types', [\App\Http\Controllers\RentalRequestController::class, 'roomTypes'])->name('user.kos.room_types');
+Route::get('/kos/{kos}/kamars', [\App\Http\Controllers\RentalRequestController::class, 'kamars'])->name('user.kos.kamars');
 
 Route::get('/register', [RegisterController::class, 'showForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
@@ -52,9 +59,9 @@ Route::middleware(['auth', 'notbanned', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'notbanned', 'role:pemilik'])->name('pemilik.')->group(function () {
     Route::get('/pemilik/dashboard', [PemilikController::class, 'index'])->name('dashboard');
 
-    // Room types (tipe kamar) management
-    Route::get('/pemilik/room-types', [RoomTypeController::class, 'index'])->name('room_types.index');
-    Route::get('/pemilik/room-types/create', [RoomTypeController::class, 'create'])->name('room_types.create');
+    // Room types (tipe kamar) management - per kos
+    Route::get('/pemilik/kos/{kos_id}/room-types', [RoomTypeController::class, 'index'])->name('room_types.index');
+    Route::get('/pemilik/kos/{kos_id}/room-types/create', [RoomTypeController::class, 'create'])->name('room_types.create');
     Route::post('/pemilik/room-types', [RoomTypeController::class, 'store'])->name('room_types.store');
     Route::get('/pemilik/room-types/{roomType}/edit', [RoomTypeController::class, 'edit'])->name('room_types.edit');
     Route::put('/pemilik/room-types/{roomType}', [RoomTypeController::class, 'update'])->name('room_types.update');
@@ -75,6 +82,17 @@ Route::middleware(['auth', 'notbanned', 'role:pemilik'])->name('pemilik.')->grou
     Route::get('/kos/{kos_id}/kamar/{id}/edit', [KamarController::class, 'edit'])->name('kamar.edit');
     Route::put('/kos/{kos_id}/kamar/{id}', [KamarController::class, 'update'])->name('kamar.update');
     Route::delete('/kos/{kos_id}/kamar/{id}', [KamarController::class, 'destroy'])->name('kamar.destroy');
+    
+    // Kamar Photos
+    Route::get('/kos/{kos_id}/kamar/{id}/photos', [KamarController::class, 'editPhotos'])->name('kamar.edit.photos');
+    Route::post('/kos/{kos_id}/kamar/{id}/photos', [KamarController::class, 'uploadPhoto'])->name('kamar.upload.photo');
+    Route::delete('/kos/{kos_id}/kamar/{id}/photos/{photo_id}', [KamarController::class, 'deletePhoto'])->name('kamar.delete.photo');
+    Route::post('/kos/{kos_id}/kamar/{id}/photos/{photo_id}/primary', [KamarController::class, 'setPrimaryPhoto'])->name('kamar.set.primary.photo');
+    
+    // Kamar Facilities
+    Route::get('/kos/{kos_id}/kamar/{id}/facilities', [KamarController::class, 'editFacilities'])->name('kamar.edit.facilities');
+    Route::post('/kos/{kos_id}/kamar/{id}/facilities', [KamarController::class, 'addFacility'])->name('kamar.add.facility');
+    Route::delete('/kos/{kos_id}/kamar/{id}/facilities/{facility_id}', [KamarController::class, 'deleteFacility'])->name('kamar.delete.facility');
 
     // Pemilik: rental requests management
     Route::get('/pemilik/rental-requests', [\App\Http\Controllers\Pemilik\RentalRequestController::class, 'index'])->name('rental_requests.index');
@@ -97,9 +115,7 @@ Route::middleware(['auth', 'notbanned', 'role:user'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     
     // User: browse kos and room types, submit rental requests
-    Route::get('/user/kos', [\App\Http\Controllers\RentalRequestController::class, 'index'])->name('user.kos.index');
-    Route::get('/user/kos/{kos}/room-types', [\App\Http\Controllers\RentalRequestController::class, 'roomTypes'])->name('user.kos.room_types');
-    Route::get('/user/kos/{kos}/kamars', [\App\Http\Controllers\RentalRequestController::class, 'kamars'])->name('user.kos.kamars');
+    // Booking routes (require authentication)
     Route::get('/user/kos/{kos}/kamars/{kamar}/rent', [\App\Http\Controllers\RentalRequestController::class, 'createForKamar'])->name('user.rental_requests.create_kamar');
     Route::get('/user/kos/{kos}/room-types/{roomType}/rent', [\App\Http\Controllers\RentalRequestController::class, 'create'])->name('user.rental_requests.create');
     Route::post('/user/rental-requests', [\App\Http\Controllers\RentalRequestController::class, 'store'])->name('user.rental_requests.store');

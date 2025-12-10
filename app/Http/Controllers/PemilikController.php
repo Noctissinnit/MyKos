@@ -32,11 +32,27 @@ class PemilikController extends Controller
             ->sum('jumlah');
 
         // 5 transaksi terakhir
-        $recentPayments = \App\Models\Pembayaran::with('penghuni.user')
+        $recentPayments = \App\Models\Pembayaran::with('penghuni.user', 'penghuni.kamar')
             ->whereHas('penghuni.kamar', fn($q) => $q->whereIn('kos_id', $kosIds))
             ->orderBy('tanggal_bayar', 'desc')
             ->take(5)
             ->get();
+
+        // Permintaan sewa pending
+        $pendingRequests = \App\Models\RentalRequest::with('user', 'kos', 'kamar', 'roomType')
+            ->whereIn('kos_id', $kosIds)
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Total permintaan pending
+        $totalPendingRequests = \App\Models\RentalRequest::whereIn('kos_id', $kosIds)
+            ->where('status', 'pending')
+            ->count();
+
+        // Data semua kos pemilik
+        $kosList = \App\Models\Kos::where('user_id', auth()->id())->with('kamars')->get();
 
         return view('pemilik.dashboard', compact(
             'totalKamar',
@@ -44,7 +60,10 @@ class PemilikController extends Controller
             'kamarKosong',
             'penghuniAktif',
             'pendapatanBulanIni',
-            'recentPayments'
+            'recentPayments',
+            'pendingRequests',
+            'totalPendingRequests',
+            'kosList'
         ));
     }
 }

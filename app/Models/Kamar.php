@@ -22,4 +22,19 @@ class Kamar extends Model
     {
         return $this->hasOne(Penghuni::class);
     }
+
+    public function photos()
+    {
+        return $this->hasMany(KamarPhoto::class);
+    }
+
+    public function facilities()
+    {
+        return $this->hasMany(KamarFacility::class);
+    }
+
+    public function primaryPhoto()
+    {
+        return $this->hasOne(KamarPhoto::class)->where('is_primary', true);
+    }
 }

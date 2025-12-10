@@ -16,10 +16,9 @@ class PaymentController extends Controller
     // verify a payment uploaded for a rental request
     public function verify(Request $request, Pembayaran $pembayaran)
     {
-        $kos = \App\Models\Kos::where('user_id', auth()->id())->firstOrFail();
-
-        // ensure the payment is for a rental in this owner's kos
-        if (!$pembayaran->rentalRequest || $pembayaran->rentalRequest->kos_id !== $kos->id) {
+        // ensure the payment belongs to a rental request and that the rental's kos
+        // is owned by the current pemilik
+        if (! $pembayaran->rentalRequest || ! $pembayaran->rentalRequest->kos || $pembayaran->rentalRequest->kos->user_id !== auth()->id()) {
             abort(403);
         }
 

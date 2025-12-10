@@ -60,12 +60,16 @@
                 @endif
             </td>
             <td>
-                <a href="{{ route('pemilik.kamar.edit', [$kos->id, $kamar->id]) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('pemilik.kamar.destroy', [$kos->id, $kamar->id]) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button onclick="return confirm('Hapus kamar ini?')" class="btn btn-sm btn-danger">Hapus</button>
-                </form>
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="{{ route('pemilik.kamar.edit', [$kos->id, $kamar->id]) }}" class="btn btn-warning">Edit</a>
+                    <a href="{{ route('pemilik.kamar.edit.photos', [$kos->id, $kamar->id]) }}" class="btn btn-info">Foto</a>
+                    <a href="{{ route('pemilik.kamar.edit.facilities', [$kos->id, $kamar->id]) }}" class="btn btn-outline-info">Fasilitas</a>
+                    <form action="{{ route('pemilik.kamar.destroy', [$kos->id, $kamar->id]) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button onclick="return confirm('Hapus kamar ini?')" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
             </td>
         </tr>
         @endforeach

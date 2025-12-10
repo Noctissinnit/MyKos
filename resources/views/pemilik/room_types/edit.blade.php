@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h1>Edit Tipe Kamar</h1>
+    <h1>Edit Tipe Kamar - {{ $kos->nama }}</h1>
 
     @if($errors->any())
         <div class="alert alert-danger">
@@ -35,6 +35,7 @@
         </div>
 
         <button class="btn btn-primary">Perbarui</button>
+        <a href="{{ route('pemilik.room_types.index', $kos->id) }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
 @endsection

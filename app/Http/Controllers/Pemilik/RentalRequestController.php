@@ -14,21 +14,24 @@ class RentalRequestController extends Controller
     // list all rental requests for pemilik's kos
     public function index()
     {
-        $kos = Kos::where('user_id', auth()->id())->firstOrFail();
-        $requests = RentalRequest::where('kos_id', $kos->id)->with('user', 'roomType')->get();
+        $kosIds = Kos::where('user_id', auth()->id())->pluck('id');
+        $requests = RentalRequest::whereIn('kos_id', $kosIds)
+            ->with('user', 'kos', 'kamar', 'roomType')
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('pemilik.rental_requests.index', compact('requests'));
     }
 
     // show a single request and available kamars for that room type
     public function show(RentalRequest $rentalRequest)
     {
-        $kos = Kos::where('user_id', auth()->id())->firstOrFail();
-        if ($rentalRequest->kos_id !== $kos->id) {
+        // Ensure the authenticated pemilik owns the kos related to this rental request
+        if (! $rentalRequest->kos || $rentalRequest->kos->user_id !== auth()->id()) {
             abort(403);
         }
 
         // available kamars in that kos matching the requested room type (kelas)
-        $availableKamars = Kamar::where('kos_id', $kos->id)
+        $availableKamars = Kamar::where('kos_id', $rentalRequest->kos_id)
             ->where('status', 'kosong')
             ->get();
 
@@ -38,8 +41,8 @@ class RentalRequestController extends Controller
     // approve a request: assign kamar, create penghuni, mark kamar terisi
     public function approve(Request $request, RentalRequest $rentalRequest)
     {
-        $kos = Kos::where('user_id', auth()->id())->firstOrFail();
-        if ($rentalRequest->kos_id !== $kos->id) {
+        // Verify ownership of the kos for this rental request
+        if (! $rentalRequest->kos || $rentalRequest->kos->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -47,7 +50,7 @@ class RentalRequestController extends Controller
             'kamar_id' => 'required|exists:kamars,id',
         ]);
 
-        $kamar = Kamar::where('id', $data['kamar_id'])->where('kos_id', $kos->id)->where('status', 'kosong')->firstOrFail();
+        $kamar = Kamar::where('id', $data['kamar_id'])->where('kos_id', $rentalRequest->kos_id)->where('status', 'kosong')->firstOrFail();
 
         // double-check availability: past approved rentals might overlap (race-condition protection)
         $start = $rentalRequest->start_date;
@@ -93,8 +96,7 @@ class RentalRequestController extends Controller
 
     public function reject(Request $request, RentalRequest $rentalRequest)
     {
-        $kos = Kos::where('user_id', auth()->id())->firstOrFail();
-        if ($rentalRequest->kos_id !== $kos->id) {
+        if (! $rentalRequest->kos || $rentalRequest->kos->user_id !== auth()->id()) {
             abort(403);
         }
 

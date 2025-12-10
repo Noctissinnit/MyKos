@@ -31,13 +31,16 @@
             <td>{{ $kos->alamat }}</td>
             <td>{{ $kos->kamars->count() }}</td>
             <td>
-                <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn btn-sm btn-info">Lihat Kamar</a>
-                <a href="{{ route('pemilik.kos.edit', $kos->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                <form action="{{ route('pemilik.kos.destroy', $kos->id) }}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button onclick="return confirm('Yakin hapus kos ini?')" class="btn btn-sm btn-danger">Hapus</button>
-                </form>
+                <div class="btn-group btn-group-sm" role="group">
+                    <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn btn-info">Kamar</a>
+                    <a href="{{ route('pemilik.room_types.index', $kos->id) }}" class="btn btn-outline-info">Tipe Kamar</a>
+                    <a href="{{ route('pemilik.kos.edit', $kos->id) }}" class="btn btn-warning">Edit</a>
+                    <form action="{{ route('pemilik.kos.destroy', $kos->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button onclick="return confirm('Yakin hapus kos ini?')" class="btn btn-sm btn-danger">Hapus</button>
+                    </form>
+                </div>
             </td>
         </tr>
         @endforeach

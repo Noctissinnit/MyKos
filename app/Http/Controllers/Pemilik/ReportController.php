@@ -81,9 +81,14 @@ class ReportController extends Controller
         $pemilikKosIds = Kos::where('user_id', auth()->id())->pluck('id');
 
         // Semua pembayaran dari penghuni yang kamar-nya berada di kos milik user
-        $pembayarans = Pembayaran::with('penghuni.user', 'penghuni.kamar')
-            ->whereHas('penghuni.kamar', function ($q) use ($pemilikKosIds) {
-                $q->whereIn('kos_id', $pemilikKosIds);
+        // include payments that are related either via penghuni->kamar OR via rentalRequest->kos
+        $pembayarans = Pembayaran::with(['penghuni.user', 'penghuni.kamar.kos', 'rentalRequest.kos', 'rentalRequest.user'])
+            ->where(function($q) use ($pemilikKosIds) {
+                $q->whereHas('penghuni.kamar', function ($q2) use ($pemilikKosIds) {
+                    $q2->whereIn('kos_id', $pemilikKosIds);
+                })->orWhereHas('rentalRequest.kos', function($q3) use ($pemilikKosIds) {
+                    $q3->whereIn('id', $pemilikKosIds);
+                });
             })
             ->orderBy('tanggal_bayar', 'desc')
             ->get();

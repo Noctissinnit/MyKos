@@ -35,7 +35,15 @@ class PaymentController extends Controller
             abort(403);
         }
 
-        return view('user.pembayarans.upload_for_rental', compact('rentalRequest'));
+        // Hitung jumlah pembayaran dari harga kamar (jika ada kamar yang dipilih)
+        $jumlah = 0;
+        if ($rentalRequest->kamar) {
+            $jumlah = $rentalRequest->kamar->harga;
+        } elseif ($rentalRequest->roomType) {
+            $jumlah = $rentalRequest->roomType->harga;
+        }
+
+        return view('user.pembayarans.upload_for_rental', compact('rentalRequest', 'jumlah'));
     }
 
     // show create form for a penghuni (user must own penghuni)
