@@ -17,7 +17,43 @@ class AdminController extends Controller
 
     public function index()
     {
-        return view('admin.dashboard');
+        // Get system statistics
+        $stats = [
+            'total_users' => User::count(),
+            'total_kos' => Kos::where('status', 'approved')->count(),
+            'total_payments' => \App\Models\Pembayaran::where('status', 'lunas')->count(),
+            'total_revenue' => \App\Models\Pembayaran::where('status', 'lunas')->sum('jumlah'),
+        ];
+
+        // Get recent activities (mock data for now - can be enhanced with real activity logging)
+        $recentActivities = collect([
+            [
+                'type' => 'success',
+                'icon' => 'bi-check-circle',
+                'title' => 'Kos baru disetujui: Kos Mawar',
+                'time' => '2 jam yang lalu'
+            ],
+            [
+                'type' => 'info',
+                'icon' => 'bi-person-plus',
+                'title' => 'User baru terdaftar: john@example.com',
+                'time' => '4 jam yang lalu'
+            ],
+            [
+                'type' => 'warning',
+                'icon' => 'bi-exclamation-triangle',
+                'title' => 'Pembayaran pending: Rp 500.000',
+                'time' => '6 jam yang lalu'
+            ],
+            [
+                'type' => 'success',
+                'icon' => 'bi-cash',
+                'title' => 'Pembayaran lunas: Rp 750.000',
+                'time' => '1 hari yang lalu'
+            ],
+        ]);
+
+        return view('admin.dashboard', compact('stats', 'recentActivities'));
     }
 
     public function banUser(Request $request, $id)

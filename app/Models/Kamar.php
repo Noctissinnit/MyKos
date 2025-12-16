@@ -10,7 +10,7 @@ class Kamar extends Model
     use HasFactory;
 
     protected $fillable = [
-        'kos_id', 'nomor', 'nama_kamar', 'kelas', 'harga', 'status', 'deskripsi', 'penghuni_id'
+        'kos_id', 'room_type_id','nomor', 'nama_kamar', 'kelas', 'harga', 'status', 'deskripsi', 'penghuni_id'
     ];
 
     public function kos()
@@ -37,4 +37,9 @@ class Kamar extends Model
     {
         return $this->hasOne(KamarPhoto::class)->where('is_primary', true);
     }
+    public function roomType()
+    {
+        return $this->belongsTo(RoomType::class, 'room_type_id');
+    }
+
 }

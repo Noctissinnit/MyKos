@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SystemSettingsController;
+use App\Http\Controllers\Admin\ContentManagementController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -49,6 +52,23 @@ Route::middleware(['auth', 'notbanned', 'role:admin'])->group(function () {
     // Admin: finance report
     Route::get('/admin/reports/finance', [\App\Http\Controllers\Admin\ReportController::class, 'finance'])->name('admin.reports.finance');
     Route::get('/admin/reports/finance/export', [\App\Http\Controllers\Admin\ReportController::class, 'exportCsv'])->name('admin.reports.finance.export');
+
+    // Admin: system settings
+    Route::get('/admin/settings', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'index'])->name('admin.settings.index');
+    Route::post('/admin/settings', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'update'])->name('admin.settings.update');
+    Route::post('/admin/settings/maintenance', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'toggleMaintenance'])->name('admin.settings.maintenance');
+    Route::post('/admin/settings/clear-cache', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'clearCache'])->name('admin.settings.clear-cache');
+    Route::post('/admin/settings/backup', [\App\Http\Controllers\Admin\SystemSettingsController::class, 'backupDatabase'])->name('admin.settings.backup');
+
+    // Admin: content management
+    Route::get('/admin/content', [\App\Http\Controllers\Admin\ContentManagementController::class, 'index'])->name('admin.content.index');
+    Route::post('/admin/content', [\App\Http\Controllers\Admin\ContentManagementController::class, 'update'])->name('admin.content.update');
+    Route::post('/admin/content/banners', [\App\Http\Controllers\Admin\ContentManagementController::class, 'storeBanner'])->name('admin.content.banners.store');
+    Route::put('/admin/content/banners/{id}', [\App\Http\Controllers\Admin\ContentManagementController::class, 'updateBanner'])->name('admin.content.banners.update');
+    Route::delete('/admin/content/banners/{id}', [\App\Http\Controllers\Admin\ContentManagementController::class, 'deleteBanner'])->name('admin.content.banners.delete');
+
+    // Admin: analytics
+    Route::get('/admin/analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('admin.analytics.index');
 });
 
 // Admin: manage users list
@@ -107,8 +127,7 @@ Route::middleware(['auth', 'notbanned', 'role:pemilik'])->name('pemilik.')->grou
     // Pemilik: finance report
     Route::get('/pemilik/reports/finance', [\App\Http\Controllers\Pemilik\ReportController::class, 'finance'])->name('reports.finance');
     Route::get('/pemilik/reports/finance/export', [\App\Http\Controllers\Pemilik\ReportController::class, 'exportCsv'])->name('reports.finance.export');
-    Route::get('pemilik/reports/transactions', [PemilikReportController::class, 'transaksi'])
-     ->name('reports.transactions');
+    Route::get('/pemilik/reports/transactions', [\App\Http\Controllers\Pemilik\ReportController::class, 'transaksi'])->name('reports.transactions');
 });
 
 Route::middleware(['auth', 'notbanned', 'role:user'])->group(function () {

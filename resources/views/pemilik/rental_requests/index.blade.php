@@ -1,51 +1,288 @@
 @extends('layouts.ownerkos')
 
 @section('content')
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3>Permintaan Sewa</h3>
-        <div>
-            <span class="badge bg-warning">{{ $requests->where('status', 'pending')->count() }} Pending</span>
-            <span class="badge bg-success ms-2">{{ $requests->where('status', 'approved')->count() }} Approved</span>
-            <span class="badge bg-danger ms-2">{{ $requests->where('status', 'rejected')->count() }} Rejected</span>
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .page-header h2 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .status-summary {
+        display: flex;
+        gap: 16px;
+    }
+    
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .status-badge.pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-badge.approved {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-badge.rejected {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+    
+    .alert-success {
+        background-color: #d1fae5;
+        border: 1px solid #86efac;
+        color: #065f46;
+        padding: 14px 16px;
+        border-radius: 8px;
+        margin-bottom: 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .alert-success .btn-close {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+    
+    .alert-success .btn-close:hover {
+        opacity: 1;
+    }
+    
+    .empty-state {
+        background: white;
+        border-radius: 12px;
+        padding: 48px 32px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .empty-state i {
+        font-size: 48px;
+        color: #d1d5db;
+        margin-bottom: 16px;
+        display: block;
+    }
+    
+    .empty-state p {
+        color: #6b7280;
+        margin-bottom: 0;
+        font-size: 16px;
+    }
+    
+    .tabs-container {
+        margin-bottom: 24px;
+    }
+    
+    .nav-tabs {
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 0;
+    }
+    
+    .nav-tabs .nav-link {
+        color: #6b7280;
+        border: none;
+        padding: 14px 18px;
+        font-weight: 500;
+        transition: all 0.2s;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -2px;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        color: #4a6fa5;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #4a6fa5;
+        background: transparent;
+        border-bottom-color: #4a6fa5;
+    }
+    
+    .tab-content {
+        margin-top: 0;
+    }
+    
+    .table-responsive {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .table {
+        margin-bottom: 0;
+        font-size: 14px;
+    }
+    
+    .table thead {
+        background-color: #f3f4f6;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .table thead th {
+        padding: 14px 16px;
+        font-weight: 600;
+        color: #374151;
+        border: none;
+    }
+    
+    .table tbody td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #f3f4f6;
+        color: #374151;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .badge {
+        padding: 6px 10px;
+        font-weight: 500;
+        font-size: 12px;
+        border-radius: 6px;
+    }
+    
+    .badge-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    
+    .badge-approved {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    
+    .badge-rejected {
+        background-color: #fee2e2;
+        color: #7f1d1d;
+    }
+    
+    .btn-detail {
+        background-color: #4a6fa5;
+        color: white;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .btn-detail:hover {
+        background-color: #3a5a8f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 111, 165, 0.3);
+        color: white;
+    }
+    
+    .rental-user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    
+    .rental-user-info strong {
+        color: #1f2937;
+        font-weight: 600;
+    }
+    
+    .rental-user-info small {
+        color: #9ca3af;
+        font-size: 12px;
+    }
+</style>
+
+<div class="container" style="max-width: 1400px; padding: 24px 0;">
+    <div class="page-header">
+        <h2>Permintaan Sewa</h2>
+        <div class="status-summary">
+            <div class="status-badge pending">
+                <i class="bi bi-hourglass-split"></i>
+                <span>{{ $requests->where('status', 'pending')->count() }} Pending</span>
+            </div>
+            <div class="status-badge approved">
+                <i class="bi bi-check-circle"></i>
+                <span>{{ $requests->where('status', 'approved')->count() }} Disetujui</span>
+            </div>
+            <div class="status-badge rejected">
+                <i class="bi bi-x-circle"></i>
+                <span>{{ $requests->where('status', 'rejected')->count() }} Ditolak</span>
+            </div>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
+        <div class="alert-success">
+            <span><i class="bi bi-check-circle" style="display: inline; margin-right: 8px;"></i> {{ session('success') }}</span>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     @if($requests->isEmpty())
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Belum ada permintaan sewa.
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Belum ada permintaan sewa</p>
         </div>
     @else
         <!-- Filter Tabs -->
-        <ul class="nav nav-tabs mb-4" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#pending">
-                    Pending <span class="badge bg-warning ms-2">{{ $requests->where('status', 'pending')->count() }}</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#approved">
-                    Approved <span class="badge bg-success ms-2">{{ $requests->where('status', 'approved')->count() }}</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#rejected">
-                    Rejected <span class="badge bg-danger ms-2">{{ $requests->where('status', 'rejected')->count() }}</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#all">
-                    Semua <span class="badge bg-secondary ms-2">{{ $requests->count() }}</span>
-                </a>
-            </li>
-        </ul>
+        <div class="tabs-container">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" data-bs-toggle="tab" href="#pending">
+                        Pending <span class="badge badge-pending ms-2">{{ $requests->where('status', 'pending')->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#approved">
+                        Disetujui <span class="badge badge-approved ms-2">{{ $requests->where('status', 'approved')->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#rejected">
+                        Ditolak <span class="badge badge-rejected ms-2">{{ $requests->where('status', 'rejected')->count() }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="tab" href="#all">
+                        Semua <span class="badge" style="background-color: #e5e7eb; color: #6b7280; ms-2">{{ $requests->count() }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
         <!-- Tab Content -->
         <div class="tab-content">
@@ -64,14 +301,18 @@
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                       <tbody>
                             @forelse($requests->where('status', 'pending') as $r)
                             <tr>
                                 <td>
-                                    <strong>{{ $r->user->name ?? '-' }}</strong><br>
-                                    <small class="text-muted">{{ $r->user->email ?? '-' }}</small>
+                                    <div class="rental-user-info">
+                                        <strong>{{ $r->user->name ?? '-' }}</strong>
+                                        <small>{{ $r->user->email ?? '-' }}</small>
+                                    </div>
                                 </td>
-                                <td><strong>{{ $r->kos->nama ?? '-' }}</strong></td>
+
+                                <td>{{ $r->kos->nama ?? '-' }}</td>
+
                                 <td>
                                     @if($r->kamar)
                                         Kamar {{ $r->kamar->nomor }}
@@ -81,24 +322,18 @@
                                         -
                                     @endif
                                 </td>
+
                                 <td>
-                                    <small>
-                                        {{ \Carbon\Carbon::parse($r->start_date)->format('d M Y') }} <br>
-                                        s/d {{ \Carbon\Carbon::parse($r->end_date)->format('d M Y') }}
-                                    </small>
+                                    {{ $r->start_date->format('d M Y') }}<br>
+                                    <small class="text-muted">s/d {{ $r->end_date->format('d M Y') }}</small>
                                 </td>
+
+                                <td>{{ $r->created_at->format('d M Y') }}</td>
+
+                                <td><span class="badge badge-pending">Pending</span></td>
+
                                 <td>
-                                    <small class="text-muted">
-                                        {{ $r->created_at->diffForHumans() }}
-                                    </small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-hourglass-split"></i> Pending
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{{ route('pemilik.rental_requests.show', $r) }}" class="btn btn-sm btn-primary">
+                                    <a href="{{ route('pemilik.rental_requests.show', $r) }}" class="btn-detail">
                                         <i class="bi bi-eye"></i> Lihat
                                     </a>
                                 </td>
@@ -106,11 +341,12 @@
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox"></i> Tidak ada permintaan pending
+                                    Tidak ada permintaan pending
                                 </td>
                             </tr>
                             @endforelse
-                        </tbody>
+                            </tbody>
+
                     </table>
                 </div>
             </div>
@@ -130,39 +366,31 @@
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                      <tbody>
                             @forelse($requests->where('status', 'approved') as $r)
                             <tr>
                                 <td>
-                                    <strong>{{ $r->user->name ?? '-' }}</strong><br>
-                                    <small class="text-muted">{{ $r->user->email ?? '-' }}</small>
+                                    <div class="rental-user-info">
+                                        <strong>{{ $r->user->name ?? '-' }}</strong>
+                                        <small>{{ $r->user->email ?? '-' }}</small>
+                                    </div>
                                 </td>
-                                <td><strong>{{ $r->kos->nama ?? '-' }}</strong></td>
+
+                                <td>{{ $r->kos->nama ?? '-' }}</td>
+
+                                <td>{{ $r->kamar->nomor ?? '-' }}</td>
+
                                 <td>
-                                    @if($r->kamar)
-                                        <span class="badge bg-light text-dark">Kamar {{ $r->kamar->nomor }}</span>
-                                    @else
-                                        -
-                                    @endif
+                                    {{ $r->start_date->format('d M Y') }}<br>
+                                    <small class="text-muted">s/d {{ $r->end_date->format('d M Y') }}</small>
                                 </td>
+
+                                <td>{{ $r->updated_at->format('d M Y') }}</td>
+
+                                <td><span class="badge badge-approved">Disetujui</span></td>
+
                                 <td>
-                                    <small>
-                                        {{ \Carbon\Carbon::parse($r->start_date)->format('d M Y') }} <br>
-                                        s/d {{ \Carbon\Carbon::parse($r->end_date)->format('d M Y') }}
-                                    </small>
-                                </td>
-                                <td>
-                                    <small class="text-muted">
-                                        {{ $r->updated_at->format('d M Y') }}
-                                    </small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> Disetujui
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{{ route('pemilik.rental_requests.show', $r) }}" class="btn btn-sm btn-primary">
+                                    <a href="{{ route('pemilik.rental_requests.show', $r) }}" class="btn-detail">
                                         <i class="bi bi-eye"></i> Detail
                                     </a>
                                 </td>
@@ -170,11 +398,12 @@
                             @empty
                             <tr>
                                 <td colspan="7" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox"></i> Tidak ada permintaan yang disetujui
+                                    Tidak ada permintaan disetujui
                                 </td>
                             </tr>
                             @endforelse
-                        </tbody>
+                            </tbody>
+
                     </table>
                 </div>
             </div>
@@ -193,46 +422,40 @@
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                       <tbody>
                             @forelse($requests->where('status', 'rejected') as $r)
                             <tr>
                                 <td>
-                                    <strong>{{ $r->user->name ?? '-' }}</strong><br>
-                                    <small class="text-muted">{{ $r->user->email ?? '-' }}</small>
+                                    <div class="rental-user-info">
+                                        <strong>{{ $r->user->name ?? '-' }}</strong>
+                                        <small>{{ $r->user->email ?? '-' }}</small>
+                                    </div>
                                 </td>
-                                <td><strong>{{ $r->kos->nama ?? '-' }}</strong></td>
+
+                                <td>{{ $r->kos->nama ?? '-' }}</td>
+
                                 <td>
-                                    @if($r->roomType)
-                                        {{ $r->roomType->nama }}
-                                    @else
-                                        -
-                                    @endif
+                                    {{ $r->roomType->nama ?? ($r->kamar->nomor ?? '-') }}
                                 </td>
+
                                 <td>
-                                    <small>
-                                        {{ \Carbon\Carbon::parse($r->start_date)->format('d M Y') }} <br>
-                                        s/d {{ \Carbon\Carbon::parse($r->end_date)->format('d M Y') }}
-                                    </small>
+                                    {{ $r->start_date->format('d M Y') }}<br>
+                                    <small class="text-muted">s/d {{ $r->end_date->format('d M Y') }}</small>
                                 </td>
-                                <td>
-                                    <small class="text-muted">
-                                        {{ $r->updated_at->format('d M Y') }}
-                                    </small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger">
-                                        <i class="bi bi-x-circle"></i> Ditolak
-                                    </span>
-                                </td>
+
+                                <td>{{ $r->updated_at->format('d M Y') }}</td>
+
+                                <td><span class="badge badge-rejected">Ditolak</span></td>
                             </tr>
                             @empty
                             <tr>
                                 <td colspan="6" class="text-center text-muted py-4">
-                                    <i class="bi bi-inbox"></i> Tidak ada permintaan yang ditolak
+                                    Tidak ada permintaan ditolak
                                 </td>
                             </tr>
                             @endforelse
-                        </tbody>
+                            </tbody>
+
                     </table>
                 </div>
             </div>
@@ -251,46 +474,43 @@
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
+                       <tbody>
                             @foreach($requests as $r)
                             <tr>
                                 <td>
-                                    <strong>{{ $r->user->name ?? '-' }}</strong><br>
-                                    <small class="text-muted">{{ $r->user->email ?? '-' }}</small>
+                                    <div class="rental-user-info">
+                                        <strong>{{ $r->user->name ?? '-' }}</strong>
+                                        <small>{{ $r->user->email ?? '-' }}</small>
+                                    </div>
                                 </td>
-                                <td><strong>{{ $r->kos->nama ?? '-' }}</strong></td>
+
+                                <td>{{ $r->kos->nama ?? '-' }}</td>
+
                                 <td>
-                                    @if($r->kamar)
-                                        Kamar {{ $r->kamar->nomor }}
-                                    @elseif($r->roomType)
-                                        {{ $r->roomType->nama }}
-                                    @else
-                                        -
-                                    @endif
+                                    {{ $r->kamar->nomor ?? $r->roomType->nama ?? '-' }}
                                 </td>
+
                                 <td>
-                                    <small>
-                                        {{ \Carbon\Carbon::parse($r->start_date)->format('d M Y') }} <br>
-                                        s/d {{ \Carbon\Carbon::parse($r->end_date)->format('d M Y') }}
-                                    </small>
+                                    {{ $r->start_date->format('d M Y') }}<br>
+                                    <small class="text-muted">s/d {{ $r->end_date->format('d M Y') }}</small>
                                 </td>
+
                                 <td>
-                                    @if($r->status === 'pending')
-                                        <span class="badge bg-warning text-dark">Pending</span>
-                                    @elseif($r->status === 'approved')
-                                        <span class="badge bg-success">Approved</span>
-                                    @else
-                                        <span class="badge bg-danger">Rejected</span>
-                                    @endif
+                                    <span class="badge 
+                                        {{ $r->status === 'pending' ? 'badge-pending' : ($r->status === 'approved' ? 'badge-approved' : 'badge-rejected') }}">
+                                        {{ ucfirst($r->status) }}
+                                    </span>
                                 </td>
+
                                 <td>
-                                    <a href="{{ route('pemilik.rental_requests.show', $r) }}" class="btn btn-sm btn-primary">
+                                    <a href="{{ route('pemilik.rental_requests.show', $r) }}" class="btn-detail">
                                         <i class="bi bi-eye"></i> Lihat
                                     </a>
                                 </td>
                             </tr>
                             @endforeach
-                        </tbody>
+                            </tbody>
+
                     </table>
                 </div>
             </div>

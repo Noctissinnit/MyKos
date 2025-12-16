@@ -1,289 +1,475 @@
 @extends('layouts.ownerkos')
 
 @section('content')
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 32px;
+    }
 
-<div class="container py-4">
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Dashboard Pemilik Kos</h2>
-        <a href="{{ route('pemilik.kos.index') }}" class="btn btn-outline-primary">
-            <i class="bi bi-building"></i> Kelola Kos
-        </a>
+    .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .stat-icon.rooms { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; }
+    .stat-icon.occupied { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+    .stat-icon.empty { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .stat-icon.tenants { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 4px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .quick-actions {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        margin-bottom: 24px;
+    }
+
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #374151;
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .action-btn:hover {
+        background: #4a6fa5;
+        color: white;
+        border-color: #4a6fa5;
+        transform: translateY(-2px);
+    }
+
+    .action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        color: #4a6fa5;
+    }
+
+    .action-btn:hover .action-icon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .recent-activity {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+    }
+
+    .activity-icon.success { background: #d1fae5; color: #065f46; }
+    .activity-icon.warning { background: #fef3c7; color: #92400e; }
+    .activity-icon.info { background: #dbeafe; color: #1d4ed8; }
+
+    .activity-content {
+        flex: 1;
+    }
+
+    .activity-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2937;
+        margin-bottom: 2px;
+    }
+
+    .activity-time {
+        font-size: 12px;
+        color: #6b7280;
+    }
+
+    .welcome-section {
+        background: linear-gradient(135deg, #4a6fa5 0%, #3a5a8f 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 16px rgba(74, 111, 165, 0.2);
+    }
+
+    .welcome-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .welcome-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-bottom: 20px;
+    }
+
+    .system-status {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .status-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+    }
+
+    .revenue-highlight {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .revenue-content {
+        flex: 1;
+    }
+
+    .revenue-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 4px;
+    }
+
+    .revenue-value {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .revenue-period {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-top: 4px;
+    }
+
+    .pending-alert {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+        box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .pending-content {
+        flex: 1;
+    }
+
+    .pending-label {
+        font-size: 14px;
+        opacity: 0.9;
+        margin-bottom: 4px;
+    }
+
+    .pending-value {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .pending-desc {
+        font-size: 12px;
+        opacity: 0.8;
+        margin-top: 4px;
+    }
+
+    .pending-action {
+        flex-shrink: 0;
+    }
+
+    .btn-primary-custom {
+        background-color: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-primary-custom:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+    }
+</style>
+
+<div style="max-width: 1400px; margin: 0 auto; padding: 24px 0;">
+    {{-- Welcome Section --}}
+    <div class="welcome-section">
+        <h1 class="welcome-title">
+            <i class="bi bi-speedometer2" style="margin-right: 12px;"></i>
+            Selamat Datang, {{ auth()->user()->name }}
+        </h1>
+        <p class="welcome-subtitle">Kelola kos dan pantau performa bisnis Anda dengan mudah</p>
+
+        <div class="system-status">
+            <div class="status-item">
+                <div class="status-dot"></div>
+                <span>Sistem Online</span>
+            </div>
+            <div class="status-item">
+                <i class="bi bi-clock"></i>
+                <span>{{ now()->format('l, d F Y H:i') }}</span>
+            </div>
+        </div>
     </div>
 
-    {{-- STAT CARDS --}}
-    <div class="row mb-4">
-
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-left-primary h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-title text-muted">Total Kamar</h6>
-                            <h3 class="text-primary mb-0">{{ $totalKamar }}</h3>
-                        </div>
-                        <i class="bi bi-door-closed text-primary" style="font-size: 1.5rem;"></i>
-                    </div>
+    {{-- Revenue & Pending Requests Highlights --}}
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+        <div class="revenue-highlight">
+            <div class="revenue-content">
+                <div class="revenue-label">
+                    <i class="bi bi-cash-coin" style="margin-right: 6px;"></i>
+                    Pendapatan Bulan Ini
                 </div>
+                <div class="revenue-value">Rp {{ number_format($pendapatanBulanIni, 0, ',', '.') }}</div>
+                <div class="revenue-period">{{ now()->format('F Y') }}</div>
             </div>
         </div>
 
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-left-success h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-title text-muted">Kamar Terisi</h6>
-                            <h3 class="text-success mb-0">{{ $kamarTerisi }}</h3>
-                        </div>
-                        <i class="bi bi-check-circle text-success" style="font-size: 1.5rem;"></i>
-                    </div>
+        @if($totalPendingRequests > 0)
+        <div class="pending-alert">
+            <div class="pending-content">
+                <div class="pending-label">
+                    <i class="bi bi-hourglass-split" style="margin-right: 6px;"></i>
+                    Permintaan Sewa Pending
                 </div>
+                <div class="pending-value">{{ $totalPendingRequests }}</div>
+                <div class="pending-desc">Menunggu persetujuan Anda</div>
             </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-left-warning h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-title text-muted">Kamar Kosong</h6>
-                            <h3 class="text-warning mb-0">{{ $kamarKosong }}</h3>
-                        </div>
-                        <i class="bi bi-exclamation-circle text-warning" style="font-size: 1.5rem;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-left-info h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="card-title text-muted">Penghuni Aktif</h6>
-                            <h3 class="text-info mb-0">{{ $penghuniAktif }}</h3>
-                        </div>
-                        <i class="bi bi-people text-info" style="font-size: 1.5rem;"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row mb-4">
-        {{-- PENDAPATAN --}}
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h6 class="card-title text-muted mb-3">
-                        <i class="bi bi-cash-coin"></i> Pendapatan Bulan Ini
-                    </h6>
-                    <h2 class="text-success">Rp {{ number_format($pendapatanBulanIni, 0, ',', '.') }}</h2>
-                    <small class="text-muted">{{ now()->format('F Y') }}</small>
-                </div>
-            </div>
-        </div>
-
-        {{-- PENDING REQUESTS --}}
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100 @if($totalPendingRequests > 0) border-warning @endif">
-                <div class="card-body">
-                    <h6 class="card-title text-muted mb-3">
-                        <i class="bi bi-hourglass-split"></i> Permintaan Sewa Pending
-                    </h6>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h2 class="text-warning mb-0">{{ $totalPendingRequests }}</h2>
-                        @if($totalPendingRequests > 0)
-                            <a href="{{ route('pemilik.rental_requests.index') }}" class="btn btn-sm btn-warning">
-                                Lihat Semua →
-                            </a>
-                        @endif
-                    </div>
-                    <small class="text-muted">Menunggu persetujuan Anda</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- PENDING REQUESTS TABLE --}}
-    @if($totalPendingRequests > 0)
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">
-                <i class="bi bi-clock-history"></i> Permintaan Sewa Terbaru
-            </h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Pengguna</th>
-                        <th>Kos</th>
-                        <th>Periode</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse($pendingRequests as $req)
-                    <tr>
-                        <td>
-                            <strong>{{ $req->user->name ?? '-' }}</strong><br>
-                            <small class="text-muted">{{ $req->user->email ?? '-' }}</small>
-                        </td>
-                        <td>{{ $req->kos->nama ?? '-' }}</td>
-                        <td>
-                            <small>
-                                {{ \Carbon\Carbon::parse($req->start_date)->format('d M Y') }} <br>
-                                s/d {{ \Carbon\Carbon::parse($req->end_date)->format('d M Y') }}
-                            </small>
-                        </td>
-                        <td>
-                            <span class="badge bg-warning text-dark">{{ ucfirst($req->status) }}</span>
-                        </td>
-                        <td>
-                            <a href="{{ route('pemilik.rental_requests.show', $req) }}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-eye"></i> Lihat
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="5" class="text-center text-muted">Tidak ada permintaan pending.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-    @endif
-
-    {{-- RECENT PAYMENTS TABLE --}}
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-credit-card"></i> Transaksi Pembayaran Terakhir
-                </h5>
-                <a href="{{ route('pemilik.reports.transactions') }}" class="btn btn-sm btn-outline-secondary">
-                    Lihat Semua
+            <div class="pending-action">
+                <a href="{{ route('pemilik.rental_requests.index') }}" class="btn-primary-custom">
+                    Lihat Semua <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
-        <div class="card-body">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Penghuni</th>
-                        <th>Kamar</th>
-                        <th>Jumlah</th>
-                        <th>Tanggal Bayar</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                @forelse($recentPayments as $p)
-                    <tr>
-                        <td>
-                            <strong>{{ $p->penghuni?->user?->name ?? '-' }}</strong><br>
-                            <small class="text-muted">{{ $p->penghuni?->kamar?->kos?->nama ?? '-' }}</small>
-                        </td>
-                        <td>
-                            <span class="badge bg-light text-dark">
-                                Kamar {{ $p->penghuni?->kamar?->nomor ?? '-' }}
-                            </span>
-                        </td>
-                        <td><strong>Rp {{ number_format($p->jumlah, 0, ',', '.') }}</strong></td>
-                        <td>{{ \Carbon\Carbon::parse($p->tanggal_bayar)->format('d M Y') }}</td>
-                        <td>
-                            @if($p->verified)
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle"></i> Terverifikasi
-                                </span>
-                            @else
-                                <span class="badge bg-warning text-dark">
-                                    <i class="bi bi-hourglass-split"></i> Menunggu
-                                </span>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="5" class="text-center text-muted">Belum ada transaksi.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
+        @endif
     </div>
 
-    {{-- KOS OVERVIEW --}}
-    @if($kosList->count() > 0)
-    <div class="card shadow-sm">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">
-                <i class="bi bi-buildings"></i> Ringkasan Semua Kos Anda
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Nama Kos</th>
-                            <th>Total Kamar</th>
-                            <th>Kamar Terisi</th>
-                            <th>Kamar Kosong</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @foreach($kosList as $kos)
-                        @php
-                            $totalKosKamar = $kos->kamars->count();
-                            $terisiKos = $kos->kamars->filter(function($kamar) {
-                                return $kamar->penghuni !== null;
-                            })->count();
-                            $kosongKos = $totalKosKamar - $terisiKos;
-                        @endphp
-                        <tr>
-                            <td>
-                                <strong>{{ $kos->nama }}</strong><br>
-                                <small class="text-muted">{{ $kos->alamat }}</small>
-                            </td>
-                            <td>
-                                <span class="badge bg-primary">{{ $totalKosKamar }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-success">{{ $terisiKos }}</span>
-                            </td>
-                            <td>
-                                <span class="badge bg-warning">{{ $kosongKos }}</span>
-                            </td>
-                            <td>
-                                @if($kos->status === 'approved')
-                                    <span class="badge bg-success">
-                                        <i class="bi bi-check-circle"></i> Aktif
-                                    </span>
-                                @else
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-hourglass-split"></i> {{ ucfirst($kos->status) }}
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn btn-sm btn-primary">
-                                    Kelola
-                                </a>
-                            </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                </table>
+    {{-- Statistics Cards --}}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon rooms">
+                    <i class="bi bi-door-closed"></i>
+                </div>
             </div>
+            <div class="stat-value">{{ $totalKamar }}</div>
+            <div class="stat-label">Total Kamar</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon occupied">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ $kamarTerisi }}</div>
+            <div class="stat-label">Kamar Terisi</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon empty">
+                    <i class="bi bi-exclamation-circle"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ $kamarKosong }}</div>
+            <div class="stat-label">Kamar Kosong</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-icon tenants">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ $penghuniAktif }}</div>
+            <div class="stat-label">Penghuni Aktif</div>
         </div>
     </div>
-    @endif
 
+    {{-- Quick Actions --}}
+    <div class="quick-actions">
+        <h5 style="margin: 0 0 4px 0; color: #1f2937;">
+            <i class="bi bi-lightning" style="margin-right: 8px;"></i>
+            Quick Actions
+        </h5>
+        <p style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px;">Akses cepat ke fitur utama</p>
+
+        <div class="actions-grid">
+            <a href="{{ route('pemilik.kos.index') }}" class="action-btn">
+                <div class="action-icon">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600;">Kelola Kos</div>
+                    <div style="font-size: 12px; color: #6b7280;">Tambah dan edit kos</div>
+                </div>
+            </a>
+
+            <a href="{{ route('pemilik.kamar.index', $kosList->first()?->id ?? '') }}" class="action-btn">
+                <div class="action-icon">
+                    <i class="bi bi-door-closed"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600;">Kelola Kamar</div>
+                    <div style="font-size: 12px; color: #6b7280;">Atur kamar dan fasilitas</div>
+                </div>
+            </a>
+
+            <a href="{{ route('pemilik.rental_requests.index') }}" class="action-btn">
+                <div class="action-icon">
+                    <i class="bi bi-clipboard-check"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600;">Permintaan Sewa</div>
+                    <div style="font-size: 12px; color: #6b7280;">Approve/reject requests</div>
+                </div>
+            </a>
+
+            <a href="{{ route('pemilik.reports.finance') }}" class="action-btn">
+                <div class="action-icon">
+                    <i class="bi bi-graph-up"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600;">Laporan Keuangan</div>
+                    <div style="font-size: 12px; color: #6b7280;">Monitor pendapatan</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    {{-- Recent Activity --}}
+    <div class="recent-activity">
+        <h5 style="margin: 0 0 20px 0; color: #1f2937;">
+            <i class="bi bi-activity" style="margin-right: 8px;"></i>
+            Aktivitas Terbaru
+        </h5>
+
+        @if(isset($recentPayments) && $recentPayments->count() > 0)
+            @foreach($recentPayments->take(5) as $payment)
+                <div class="activity-item">
+                    <div class="activity-icon success">
+                        <i class="bi bi-cash"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-title">
+                            Pembayaran dari {{ $payment->penghuni?->user?->name ?? 'Unknown' }}
+                            - Rp {{ number_format($payment->jumlah, 0, ',', '.') }}
+                        </div>
+                        <div class="activity-time">{{ \Carbon\Carbon::parse($payment->tanggal_bayar)->format('d M Y H:i') }}</div>
+                    </div>
+                </div>
+            @endforeach
+        @else
+            <div style="text-align: center; padding: 40px 20px; color: #6b7280;">
+                <i class="bi bi-info-circle" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                <div>Belum ada aktivitas pembayaran</div>
+            </div>
+        @endif
+    </div>
 </div>
 
 @endsection

@@ -76,24 +76,61 @@ class ReportController extends Controller
         return $response;
     }
 
-   public function transaksi()
+   public function transaksi(Request $request)
     {
         $pemilikKosIds = Kos::where('user_id', auth()->id())->pluck('id');
 
-        // Semua pembayaran dari penghuni yang kamar-nya berada di kos milik user
-        // include payments that are related either via penghuni->kamar OR via rentalRequest->kos
-        $pembayarans = Pembayaran::with(['penghuni.user', 'penghuni.kamar.kos', 'rentalRequest.kos', 'rentalRequest.user'])
-            ->where(function($q) use ($pemilikKosIds) {
+        // Get all kos owned by pemilik for filter dropdown
+        $kosList = Kos::where('user_id', auth()->id())->select('id', 'nama')->get();
+
+        // Filter by kos_id if provided
+        $selectedKosId = $request->input('kos_id');
+
+        // Build query for payments
+        $query = Pembayaran::query();
+
+        // Apply kos filter
+        if ($selectedKosId) {
+            $query->where(function($q) use ($selectedKosId) {
+                $q->whereHas('penghuni.kamar', function ($q2) use ($selectedKosId) {
+                    $q2->where('kos_id', $selectedKosId);
+                })->orWhereHas('rentalRequest', function($q3) use ($selectedKosId) {
+                    $q3->where('kos_id', $selectedKosId);
+                });
+            });
+        } else {
+            // If no specific kos selected, show all payments for pemilik's kos
+            $query->where(function($q) use ($pemilikKosIds) {
                 $q->whereHas('penghuni.kamar', function ($q2) use ($pemilikKosIds) {
                     $q2->whereIn('kos_id', $pemilikKosIds);
-                })->orWhereHas('rentalRequest.kos', function($q3) use ($pemilikKosIds) {
-                    $q3->whereIn('id', $pemilikKosIds);
+                })->orWhereHas('rentalRequest', function($q3) use ($pemilikKosIds) {
+                    $q3->whereIn('kos_id', $pemilikKosIds);
                 });
-            })
-            ->orderBy('tanggal_bayar', 'desc')
-            ->get();
+            });
+        }
 
-        return view('pemilik.reports.transaksi', compact('pembayarans'));
+        $pembayarans = $query->with([
+            'penghuni.user',
+            'penghuni.kamar.kos',
+            'rentalRequest.kos',
+            'rentalRequest.user'
+        ])->orderBy('tanggal_bayar', 'desc')->get();
+
+        // Calculate totals
+        $totalTransaksi = $pembayarans->count();
+        $totalTerkumpul = $pembayarans->sum('jumlah');
+        $totalTerverifikasi = $pembayarans->where('verified', true)->count();
+        $totalMenunggu = $pembayarans->where('verified', false)->count();
+
+        return view('pemilik.reports.transaksi', compact(
+            'pembayarans',
+            'kosList',
+            'selectedKosId',
+            'totalTransaksi',
+            'totalTerkumpul',
+            'totalTerverifikasi',
+            'totalMenunggu'
+        ));
     }
 
 }

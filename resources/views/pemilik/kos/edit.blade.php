@@ -34,7 +34,6 @@
     }
 
     .form-group input,
-    .form-group select,
     .form-group textarea {
         width: 100%;
         padding: 10px 12px;
@@ -46,7 +45,6 @@
     }
 
     .form-group input:focus,
-    .form-group select:focus,
     .form-group textarea:focus {
         outline: none;
         border-color: #4a6fa5;
@@ -107,6 +105,12 @@
         border-radius: 8px;
     }
 
+    .alert-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
     .error-text {
         font-size: 12px;
         color: #dc2626;
@@ -137,92 +141,47 @@
 
 <div class="form-container">
     <div class="form-card">
-        <h2 class="form-title">Edit Kamar untuk {{ $kos->nama }}</h2>
+        <h2 class="form-title">Edit Kos</h2>
 
-        @if($errors->any())
+        @if ($errors->any())
             <div class="alert-custom alert-danger">
                 <i class="bi bi-exclamation-triangle" style="margin-right: 8px;"></i>
                 <strong>Terjadi kesalahan:</strong>
                 <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-                    @foreach($errors->all() as $error)
+                    @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
                 </ul>
             </div>
         @endif
 
-        <form action="{{ route('pemilik.kamar.update', [$kos->id, $kamar->id]) }}" method="POST">
+        <form action="{{ route('pemilik.kos.update', $kos->id) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div class="form-group">
-                <label for="nomor">Nomor Kamar</label>
+                <label for="nama">Nama Kos</label>
                 <input 
                     type="text" 
-                    id="nomor" 
-                    name="nomor" 
-                    class="@error('nomor') is-invalid @enderror" 
-                    value="{{ old('nomor', $kamar->nomor) }}" 
+                    id="nama" 
+                    name="nama" 
+                    class="@error('nama') is-invalid @enderror" 
+                    value="{{ old('nama', $kos->nama) }}" 
                     required>
-                @error('nomor')
+                @error('nama')
                     <div class="error-text">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label for="nama_kamar">Nama Kamar (opsional)</label>
-                <input 
-                    type="text" 
-                    id="nama_kamar" 
-                    name="nama_kamar" 
-                    class="@error('nama_kamar') is-invalid @enderror" 
-                    value="{{ old('nama_kamar', $kamar->nama_kamar) }}">
-                @error('nama_kamar')
-                    <div class="error-text">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="kelas">Kelas Kamar</label>
-                <select 
-                    id="kelas" 
-                    name="kelas" 
-                    class="@error('kelas') is-invalid @enderror" 
-                    required>
-                    <option value="ekonomi" {{ old('kelas', $kamar->kelas) == 'ekonomi' ? 'selected' : '' }}>Ekonomi</option>
-                    <option value="standar" {{ old('kelas', $kamar->kelas) == 'standar' ? 'selected' : '' }}>Standar</option>
-                    <option value="premium" {{ old('kelas', $kamar->kelas) == 'premium' ? 'selected' : '' }}>Premium</option>
-                </select>
-                @error('kelas')
-                    <div class="error-text">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="harga">Harga (per bulan)</label>
-                <input 
-                    type="number" 
-                    id="harga" 
-                    name="harga" 
-                    class="@error('harga') is-invalid @enderror" 
-                    value="{{ old('harga', $kamar->harga) }}" 
-                    required>
-                @error('harga')
-                    <div class="error-text">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select 
-                    id="status" 
-                    name="status" 
-                    class="@error('status') is-invalid @enderror" 
-                    required>
-                    <option value="kosong" {{ old('status', $kamar->status) == 'kosong' ? 'selected' : '' }}>Kosong</option>
-                    <option value="terisi" {{ old('status', $kamar->status) == 'terisi' ? 'selected' : '' }}>Terisi</option>
-                </select>
-                @error('status')
+                <label for="alamat">Alamat</label>
+                <textarea 
+                    id="alamat" 
+                    name="alamat" 
+                    class="@error('alamat') is-invalid @enderror" 
+                    rows="3" 
+                    required>{{ old('alamat', $kos->alamat) }}</textarea>
+                @error('alamat')
                     <div class="error-text">{{ $message }}</div>
                 @enderror
             </div>
@@ -233,7 +192,7 @@
                     id="deskripsi" 
                     name="deskripsi" 
                     class="@error('deskripsi') is-invalid @enderror" 
-                    rows="4">{{ old('deskripsi', $kamar->deskripsi) }}</textarea>
+                    rows="4">{{ old('deskripsi', $kos->deskripsi) }}</textarea>
                 @error('deskripsi')
                     <div class="error-text">{{ $message }}</div>
                 @enderror
@@ -243,7 +202,7 @@
                 <button type="submit" class="btn-submit">
                     <i class="bi bi-check-lg me-2"></i> Simpan Perubahan
                 </button>
-                <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn-cancel">
+                <a href="{{ route('pemilik.kos.index') }}" class="btn-cancel">
                     <i class="bi bi-x-lg me-2"></i> Batal
                 </a>
             </div>

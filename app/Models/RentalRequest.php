@@ -11,6 +11,11 @@ class RentalRequest extends Model
 
     protected $fillable = ['user_id', 'kos_id', 'kamar_id', 'room_type_id', 'start_date', 'end_date', 'status', 'message'];
 
+    protected $casts = [
+        'start_date' => 'date',
+        'end_date' => 'date',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -28,7 +33,7 @@ class RentalRequest extends Model
 
     public function roomType()
     {
-        return $this->belongsTo(RoomType::class);
+       return $this->belongsTo(RoomType::class, 'room_type_id');
     }
 
     public function payments()

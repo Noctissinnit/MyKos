@@ -1,69 +1,237 @@
 @extends('layouts.ownerkos')
 
 @section('content')
-<div class="col-md-6 mx-auto">
-    <div class="card shadow">
-        <div class="card-body">
-            <h4 class="mb-4">Tambah Kamar untuk {{ $kos->nama }}</h4>
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
 
-            <form action="{{ route('pemilik.kamar.store', $kos->id) }}" method="POST">
-                @csrf
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
 
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="mb-0">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        
-                        <input type="hidden" id="kelas" name="kelas">
+    .form-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f1f1f;
+        margin-bottom: 24px;
+    }
 
+    .form-group {
+        margin-bottom: 20px;
+    }
 
-                        <div class="mb-3">
-                            <label>Nomor Kamar</label>
-                            <input type="text" name="nomor" class="form-control" value="{{ old('nomor') }}" required>
-                        </div>
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1f1f1f;
+        margin-bottom: 8px;
+    }
 
-                <div class="mb-3">
-                    <label>Tipe Kamar</label>
-                    <select name="room_type_id" id="room_type_id" class="form-select" required>
-                        <option value="">-- Pilih Tipe Kamar --</option>
-                        @foreach($roomTypes as $type)
-                            <option value="{{ $type->id }}" data-harga="{{ $type->harga }}">
-                                {{ $type->nama }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: 'Poppins', sans-serif;
+        transition: all 0.3s ease;
+    }
 
-                <div class="mb-3">
-                    <label>Harga (per bulan)</label>
-                    <input type="number" id="harga" name="harga" class="form-control" readonly>
-                </div>
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #4a6fa5;
+        box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.1);
+    }
 
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 28px;
+    }
 
-                <button type="submit" class="btn btn-success">Simpan</button>
-                <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn btn-secondary">Kembali</a>
-            </form>
-        </div>
+    .btn-submit {
+        flex: 1;
+        padding: 12px 24px;
+        background-color: #4a6fa5;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        background-color: #3a5a8f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 111, 165, 0.3);
+    }
+
+    .btn-cancel {
+        flex: 1;
+        padding: 12px 24px;
+        background-color: white;
+        color: #6c757d;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+        color: #1f1f1f;
+    }
+
+    .alert {
+        margin-bottom: 20px;
+        padding: 12px 16px;
+        border-radius: 8px;
+    }
+
+    .alert-danger {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .error-text {
+        font-size: 12px;
+        color: #dc2626;
+        margin-top: 4px;
+    }
+
+    .alert-custom {
+        padding: 16px 20px;
+        border-radius: 8px;
+        border: none;
+        margin-bottom: 24px;
+    }
+
+    .alert-danger {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .alert-danger ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .alert-danger li {
+        margin-bottom: 4px;
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-card">
+        <h2 class="form-title">Tambah Kamar untuk {{ $kos->nama }}</h2>
+
+        @if($errors->any())
+            <div class="alert-custom alert-danger">
+                <i class="bi bi-exclamation-triangle" style="margin-right: 8px;"></i>
+                <strong>Terjadi kesalahan:</strong>
+                <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('pemilik.kamar.store', $kos->id) }}" method="POST">
+            @csrf
+
+            <input type="hidden" id="kelas" name="kelas">
+
+            <div class="form-group">
+                <label for="nomor">Nomor Kamar</label>
+                <input 
+                    type="text" 
+                    id="nomor" 
+                    name="nomor" 
+                    class="@error('nomor') is-invalid @enderror" 
+                    value="{{ old('nomor') }}" 
+                    required>
+                @error('nomor')
+                    <div class="error-text">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="room_type_id">Tipe Kamar</label>
+                <select 
+                    id="room_type_id" 
+                    name="room_type_id" 
+                    class="@error('room_type_id') is-invalid @enderror" 
+                    required>
+                    <option value="">-- Pilih Tipe Kamar --</option>
+                    @foreach($roomTypes as $type)
+                        <option 
+                            value="{{ $type->id }}" 
+                            data-harga="{{ $type->harga }}"
+                            {{ old('room_type_id') == $type->id ? 'selected' : '' }}>
+                            {{ $type->nama }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('room_type_id')
+                    <div class="error-text">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-group">
+                <label for="harga">Harga (per bulan)</label>
+                <input 
+                    type="number" 
+                    id="harga" 
+                    name="harga" 
+                    class="@error('harga') is-invalid @enderror" 
+                    readonly>
+                @error('harga')
+                    <div class="error-text">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                    <i class="bi bi-check-lg me-2"></i> Simpan
+                </button>
+                <a href="{{ route('pemilik.kamar.index', $kos->id) }}" class="btn-cancel">
+                    <i class="bi bi-x-lg me-2"></i> Batal
+                </a>
+            </div>
+        </form>
     </div>
 </div>
+
 @endsection
 
 @section('scripts')
-
 <script>
 document.getElementById('room_type_id').addEventListener('change', function() {
     let selected = this.options[this.selectedIndex];
     let harga = selected.getAttribute('data-harga');
-    let nama = selected.text; // kelas = nama type
+    let nama = selected.text;
 
     document.getElementById('harga').value = harga ?? '';
     document.getElementById('kelas').value = nama ?? '';
 });
 </script>
-
-@endsection 
+@endsection
